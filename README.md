@@ -1,12 +1,21 @@
 ## About this directory
-Up to this point, I have used yt-dlp for downloading from Crunchyroll, Funimation, and YouTube.
+Up to this point, I have used yt-dlp for downloading from YouTube. I also used yt-dlp for other services (Crunchyroll, Funimation), but the implementation of DRM has broken the ability to download from them.
+
+This main directory contains the standard `yt-dlp.conf` file. When running the yt-dlp command, add this config file like so:
+
+`yt-dlp --config-locations <path to this directory> <URL>`
 
 The subdirectories contained in this root directory contain one `yt-dlp.conf` file for each streaming service. 
-Each of those `yt-dlp.conf` files has some distinct purpose that separates it from the other files in the subdirectories. 
-Those files also link to the root `yt-dlp.conf` file except `./dubs/yt-dlp.conf` which is a supplementary config file. 
-This setup acts as a sort of inheritance of config files.
+Each of those `yt-dlp.conf` files has some distinct purpose that separates it from the other files in the subdirectories.
 
-Each service's config file also archives downloaded movies into a file named after that service (e.g., `.crunchyroll_archive`). The name starts with a period (.) because I prefer hiding the file.
+## Download yt-dlp
+Use the following commands to download yt-dlp:
+```
+# Source: https://github.com/yt-dlp/yt-dlp-wiki/blob/master/Installation.md
+sudo add-apt-repository ppa:tomtomtom/yt-dlp    # Add ppa repo to apt
+sudo apt update                                 # Update package list
+sudo apt install yt-dlp -y                      # Install yt-dlp
+```
 
 ## Purpose of the files
 NOTE: For the following relative locations below, assume the present directory is `{path to root}/conf_files/`. 
@@ -14,7 +23,23 @@ NOTE: For the following relative locations below, assume the present directory i
 ### ./yt-dlp.conf
 - Contains all of the standard options that I want in every use of the `yt-dlp` command.
 
-- All other .conf files are in separate subdirectories. If those files choose to reference this primary .conf file, they will do so with `--config-locations ../`
+- If you want to include the archival configuration, add the following into your command before the URL: `--config-locations ../archival`
+
+### ./archival/yt-dlp.conf
+This configuration consists of one command: search the playlist solely for videos posted within the last 30 days.  This is helpful if you're using an automated cron job to perform recurring searches and don't want to attempt to download entire playlists all over again. 
+
+NOTE that using an archive config to prevent re-downloading files DOES NOT prevent yt-dlp from attempting to download the file first before checking with the archive file. The command will look like this:
+```
+yt-dlp                                                \
+  --config-locations <path to project root>           \
+  --config-locations <path to project root>/archival  \
+  <URL>
+
+```
+
+## Old Config Files
+
+Funimation and Crunchyroll have merged and implemented DRM, breaking the extractors yt-dlp uses to download the videos. I am keeping the conf files here anyway.
 
 ### ./crunchyroll/yt-dlp.conf
 - Some minor configurations specific to Crunchyroll.
@@ -42,17 +67,12 @@ Some failing examples:
 - (English Dubbed)
 - English dubs <-note: there are no parentheses 
 
-### ./archival/yt-dlp.conf
-This configuration consists of one command: search the playlist solely for videos posted within the last 30 days.  This is helpful if you're using an automated cron job to perform recurring searches and don't want to attempt to download entire playlists all over again. 
-
-NOTE that using an archive file to prevent re-downloading files DOES NOT prevent yt-dlp from attempting to download the file first before checking with the archive file.
-
 ### ./funimation/yt-dlp.conf
  This config file contains the explicit extractor args for funimation (currently commented out) and a reference to cookies. Otherwise, there's nothing special here.
 
-### ./youtube/yt-dlp.conf
 
-
+<!-- These aren't needed, but I'm keeping them here anyway -->
+<!-- 
 ## Other Talking Points
 - You DO NOT need to use these files. They are all customized for my personal experience. You can copy and modify them however you wish.
 
@@ -67,6 +87,4 @@ NOTE that using an archive file to prevent re-downloading files DOES NOT prevent
 - To override any of the default parameters in the config files, you can specify those parameters explicitly after the `--config-locations ...` parameters. For example:
 	`yt-dlp --config-locations yt-dlp-conf/funimation --username newUsername --password 12345 --concurrent-fragments 2 www.url.com/video`
 
-- The default `yt-dlp.conf` file as well as the service-related subdirectories (Crunchyroll, Funimation) use different 
-  archive files. If you want one single archive file for all videos, consider commenting out the `--archive-file` parameters from 
-  those respective `yt-dlp.conf` files.
+- The default `yt-dlp.conf` file as well as the service-related subdirectories (Crunchyroll, Funimation) use different archive files. If you want one single archive file for all videos, consider commenting out the `--archive-file` parameters from those respective `yt-dlp.conf` files. -->
